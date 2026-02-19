@@ -108,6 +108,26 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     }
   }
 
+  const addToHubDBTable = async () => {
+    const companyId = context.crm.objectId;
+    const companyNumber = searchValue;
+    const status = companyData.status;
+    const type = companyData.type;
+    const incorporationDate = companyData.incorporationDate;
+    const officeAddress = companyData.office_address;
+    const sicCode = companyData.sicCode;
+    const officers = companyData.officerString;
+
+    try {
+      const { response } = await runServerless({
+        name: "addToHubDB",
+        parameters: { companyNumber, companyId, status, type, incorporationDate, officeAddress, sicCode, officers }
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
 
 
   // Returns the JSX layout for the extension UI
@@ -148,6 +168,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             <Text>SIC Code: {companyData.sicCode}</Text>
             <Button onClick={createContact}>Sync Officers to CRM</Button>
             <Button onClick={addProperties}>Add Information to Properties</Button>
+            <Button onClick={addToHubDBTable}>Add to HubDB Table</Button>
           </Box>
         </Tile>
       )}

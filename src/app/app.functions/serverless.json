@@ -10,6 +10,9 @@
       },
       "addToProperties": {
         "file": "addToProperties.js"
+      },
+      "addToHubDB": {
+        "file": "addToHubDB.js"
       }
     }
   }
