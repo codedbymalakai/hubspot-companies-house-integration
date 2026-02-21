@@ -79,15 +79,31 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // then shows a success alert if the officers are added or logs an error if the process fails
   const createContact = async () => {
     const companyNumber = searchValue.trim();
+    if (!companyNumber) {
+      setMood("error");
+      setErrorMessage("No valid company number");
+      sendAlert({ message: "Company number is not valid", type: "danger" });
+      return;
+    }
     const companyId = context.crm.objectId;
+    setMood("loading");
     try {
       const { response } = await runServerless({
         name: "addOfficersToCRM",
         parameters: { companyNumber, companyId },
       });
-
+      console.log(response);
+      console.log(response.ok);
+      console.log(response.error);
+      if (response.ok === false) {
+        sendAlert({
+          message: response.error,
+          type: "danger",
+        });
+        return;
+      }
       sendAlert({
-        message: `Officers added to the CRM successfully!`,
+        message: response.message,
         type: "success",
       });
     } catch (error) {
@@ -172,7 +188,9 @@ const Extension = ({ runServerless, sendAlert, context }) => {
               value={searchValue}
               onChange={(value) => setSearchValue(value)}
             />
-            <Button type="submit">Search</Button>
+            <Button type="submit" disabled={mood === "loading"}>
+              Search
+            </Button>
           </Flex>
         </Form>
       </Tile>
@@ -192,11 +210,15 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             <Text>Incorporation Date: {companyData.incorporationDate}</Text>
             <Text>Registered Office Address: {companyData.office_address}</Text>
             <Text>SIC Code: {companyData.sicCode}</Text>
-            <Button onClick={createContact}>Sync Officers to CRM</Button>
-            <Button onClick={addProperties}>
+            <Button onClick={createContact} disabled={mood === "loading"}>
+              Sync Officers to CRM
+            </Button>
+            <Button onClick={addProperties} disabled={mood === "loading"}>
               Add Information to Properties
             </Button>
-            <Button onClick={addToHubDBTable}>Add to HubDB Table</Button>
+            <Button onClick={addToHubDBTable} disabled={mood === "loading"}>
+              Add to HubDB Table
+            </Button>
           </Box>
         </Tile>
       )}
