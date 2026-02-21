@@ -2,7 +2,7 @@
 const axios = require("axios");
 
 // Takes a string and returns it with the first letter is capitalised
-// and the rest of the string in lowercase 
+// and the rest of the string in lowercase
 function capitalizeFirst(str) {
   if (!str) return "";
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -12,9 +12,9 @@ function capitalizeFirst(str) {
 function toTitleCase(str) {
   return str
     .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 // Defines the main entry point for the HubSpot serverless function.
@@ -27,9 +27,12 @@ exports.main = async (context = {}) => {
     const companyNumber = context.parameters?.companyNumber || "14617299";
 
     // Fetch general information from Companies House API
-    const companyResponse = await axios.get(`${BASE_URL}/company/${companyNumber}`, {
-      auth: { username: COMPANIES_HOUSE_API_KEY, password: "" }
-    });
+    const companyResponse = await axios.get(
+      `${BASE_URL}/company/${companyNumber}`,
+      {
+        auth: { username: COMPANIES_HOUSE_API_KEY, password: "" },
+      },
+    );
 
     // Extract and format key company details
     const data = companyResponse.data;
@@ -43,20 +46,25 @@ exports.main = async (context = {}) => {
       address?.address_line_2,
       address?.locality,
       address?.postal_code,
-      address?.country
+      address?.country,
       // The filter(Boolean) removes any undefined or empty address fields.
-    ].filter(Boolean).join(", ");
+    ]
+      .filter(Boolean)
+      .join(", ");
 
     const sicCode = data.sic_codes?.[0] || "No SIC code available";
 
-  // Fetch company officers from the Companies House API.
-  // Loop through and collect all officer names.
+    // Fetch company officers from the Companies House API.
+    // Loop through and collect all officer names.
     const officersArray = [];
-    const officersResponse = await axios.get(`${BASE_URL}/company/${companyNumber}/officers`, {
-      auth: { username: COMPANIES_HOUSE_API_KEY, password: "" }
-    });
+    const officersResponse = await axios.get(
+      `${BASE_URL}/company/${companyNumber}/officers`,
+      {
+        auth: { username: COMPANIES_HOUSE_API_KEY, password: "" },
+      },
+    );
 
-    for (let i = 0; i < officersResponse.data.items.length; i++){
+    for (let i = 0; i < officersResponse.data.items.length; i++) {
       officersArray.push(officersResponse.data.items[i].name);
     }
 
@@ -73,8 +81,9 @@ exports.main = async (context = {}) => {
     const officerString = officerNames.join(`, `);
     console.log(officerString);
 
-
-    const officers = (officersResponse.data.items || []).map(o => o.name).join(", ");
+    const officers = (officersResponse.data.items || [])
+      .map((o) => o.name)
+      .join(", ");
     console.log(officers);
 
     // Return a structured response containing all company details and officer information.
@@ -86,16 +95,15 @@ exports.main = async (context = {}) => {
         incorporationDate,
         office_address,
         sicCode,
-        officerString
-      }
+        officerString,
+      },
     };
     // Catch and log any errors that occur during API calls or data processing for debugging.
   } catch (error) {
-    console.log("API call failed", error)
+    console.log("API call failed", error);
     return {
       statusCode: 500,
-      body: { error: error.response?.data || error.message }
+      body: { error: error.response?.data || error.message },
     };
   }
 };
-
