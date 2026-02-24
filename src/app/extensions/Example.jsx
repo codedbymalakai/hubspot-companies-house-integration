@@ -55,16 +55,18 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         parameters: { companyNumber }, // pass input to serverless
       });
 
-      if (response?.body?.error) {
-        sendAlert({ message: response.body.error.message, type: "danger" });
+      if (!response?.body?.ok) {
+        sendAlert({
+          message: response?.body?.error || "Request Failed",
+          type: "danger",
+        });
         setMood("error");
-        setErrorMessage("Error: " + response.body.error.message);
+        setErrorMessage("Error: " + response?.body?.error || "Request Failed");
         return;
-      } else {
-        setCompanyData(response.body); // store API results
-        setMood("success");
-        setErrorMessage("");
       }
+      setCompanyData(response.body); // store API results
+      setMood("success");
+      setErrorMessage("");
     } catch (error) {
       console.error("Error fetching company data:", error);
       sendAlert({ message: "Error fetching company data", type: "danger" });
