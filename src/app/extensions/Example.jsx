@@ -61,7 +61,11 @@ const Extension = ({ runServerless, sendAlert, context }) => {
           type: "danger",
         });
         setMood("error");
-        setErrorMessage("Error: " + response?.body?.error || "Request Failed");
+        setErrorMessage(
+          response?.body?.error
+            ? `Error: ${error.message}`
+            : "Something went wrong.",
+        );
         return;
       }
       setCompanyData(response.body); // store API results
@@ -87,29 +91,44 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       sendAlert({ message: "Company number is not valid", type: "danger" });
       return;
     }
-    const companyId = context.crm.objectId;
+    const companyId = context?.crm?.objectId;
+    if (!companyId) {
+      setMood("error");
+      setErrorMessage("No valid company ID");
+      sendAlert({ message: "Company ID is not valid", type: "danger" });
+      return;
+    }
     setMood("loading");
     try {
       const { response } = await runServerless({
         name: "addOfficersToCRM",
         parameters: { companyNumber, companyId },
       });
-      console.log(response);
-      console.log(response.ok);
-      console.log(response.error);
-      if (response.ok === false) {
+      if (!response?.body?.ok) {
         sendAlert({
-          message: response.error,
+          message: response?.body?.error || "Error!",
           type: "danger",
         });
+        setMood("error");
+        setErrorMessage(
+          response?.body?.error
+            ? `Error: ${response.body.error}`
+            : "Error: Something went wrong.",
+        );
         return;
       }
+      setMood("success");
+      setErrorMessage("");
       sendAlert({
-        message: response?.body?.message,
+        message: response?.body?.message || "Success!",
         type: "success",
       });
     } catch (error) {
       console.error("Error creating contacts:", error);
+      setMood("error");
+      setErrorMessage(
+        error.message ? `Error: ${error.message}` : "Something went wrong.",
+      );
     }
   };
 
