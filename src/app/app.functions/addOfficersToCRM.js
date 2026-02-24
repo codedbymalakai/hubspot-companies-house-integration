@@ -172,6 +172,9 @@ exports.main = async (context = {}) => {
   // Return success response
   return {
     statusCode: 200,
-    body: {},
+    body: {
+      ok: true,
+      message: "Successfully Added Contacts to the CRM!",
+    },
   };
 };

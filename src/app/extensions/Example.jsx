@@ -105,7 +105,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         return;
       }
       sendAlert({
-        message: response.message,
+        message: response?.body?.message,
         type: "success",
       });
     } catch (error) {
