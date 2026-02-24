@@ -34,6 +34,7 @@ exports.main = async (context = {}) => {
       },
     );
 
+    const statusCode = companyResponse.status;
     // Extract and format key company details
     const data = companyResponse.data;
     const status = capitalizeFirst(data.company_status);
@@ -63,6 +64,8 @@ exports.main = async (context = {}) => {
         auth: { username: COMPANIES_HOUSE_API_KEY, password: "" },
       },
     );
+    // console.log(officersResponse.response.status);
+    // console.log("HELLOOOOOOOOOOOOOOOOOOOO");
 
     for (let i = 0; i < officersResponse.data.items.length; i++) {
       officersArray.push(officersResponse.data.items[i].name);
@@ -73,23 +76,20 @@ exports.main = async (context = {}) => {
     // Join all formatted names into a single string for display.
     for (let i = 0; i < officersArray.length; i++) {
       const parts = officersArray[i].split(",");
-      firstName = parts[1].trim();
-      lastName = toTitleCase(parts[0]);
+      const firstName = parts[1].trim();
+      const lastName = toTitleCase(parts[0]);
       officerNames.push(`${firstName} ${lastName}`);
     }
 
     const officerString = officerNames.join(`, `);
     console.log(officerString);
 
-    const officers = (officersResponse.data.items || [])
-      .map((o) => o.name)
-      .join(", ");
-    console.log(officers);
 
     // Return a structured response containing all company details and officer information.
     return {
-      statusCode: 200,
+      statusCode,
       body: {
+        ok: true,
         status,
         type,
         incorporationDate,
@@ -100,10 +100,9 @@ exports.main = async (context = {}) => {
     };
     // Catch and log any errors that occur during API calls or data processing for debugging.
   } catch (error) {
-    console.log("API call failed", error);
     return {
-      statusCode: 500,
-      body: { error: error.response?.data || error.message },
+      statusCode: error?.response?.status || 500,
+      body: { ok: false, error: error.message || "Unknown Error" },
     };
   }
 };

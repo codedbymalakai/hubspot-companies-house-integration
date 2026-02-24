@@ -55,7 +55,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         parameters: { companyNumber }, // pass input to serverless
       });
 
-      if (response?.body?.error?.message) {
+      if (response?.body?.error) {
         sendAlert({ message: response.body.error.message, type: "danger" });
         setMood("error");
         setErrorMessage("Error: " + response.body.error.message);
