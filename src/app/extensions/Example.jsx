@@ -136,14 +136,42 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // including type, status, incorporation date, address, SIC code, and officers.
   // while logging any errors that occur in the process
   const addProperties = async () => {
-    const companyId = context.crm.objectId;
     const companyNumber = searchValue.trim();
-    const status = companyData.status;
-    const type = companyData.type;
-    const incorporationDate = companyData.incorporationDate;
-    const officeAddress = companyData.office_address;
-    const sicCode = companyData.sicCode;
-    const officers = companyData.officerString;
+    if (!companyNumber) {
+      setMood("error");
+      setErrorMessage("Company number not valid");
+      sendAlert({ message: "Company number is not valid", type: "danger" });
+      return;
+    }
+
+    const companyId = context?.crm?.objectId;
+    if (!companyId) {
+      setMood("error");
+      setErrorMessage("Company ID not valid");
+      sendAlert({ message: "Company ID is not valid", type: "danger" });
+      return;
+    }
+    if (mood !== "success") {
+      sendAlert({
+        message: "Please wait for the search to finish",
+        type: "warning",
+      });
+      return;
+    }
+    if (!companyData) {
+      setMood("error");
+      setErrorMessage("Company Data not valid");
+      sendAlert({ message: "Company data is not valid", type: "danger" });
+      return;
+    }
+    const status = companyData.status || "";
+    const type = companyData.type || "";
+    const incorporationDate = companyData.incorporationDate || "";
+    const officeAddress = companyData.office_address || "";
+    const sicCode = companyData.sicCode || "";
+    const officers = companyData.officerString || "";
+
+    setMood("loading");
 
     try {
       const { response } = await runServerless({
@@ -159,8 +187,32 @@ const Extension = ({ runServerless, sendAlert, context }) => {
           officers,
         },
       });
+
+      if (!response?.body?.ok) {
+        sendAlert({
+          message: response?.body?.error || "Error!",
+          type: "danger",
+        });
+        setMood("error");
+        setErrorMessage(
+          response?.body?.error
+            ? `Error: ${response.body.error}`
+            : "Error: Something went wrong.",
+        );
+        return;
+      }
+      setMood("success");
+      setErrorMessage("");
+      sendAlert({
+        message: response?.body?.message || "Success!",
+        type: "success",
+      });
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error adding properties to the CRM:", error);
+      setMood("error");
+      setErrorMessage(
+        error.message ? `Error: ${error.message}` : "Something went wrong.",
+      );
     }
   };
 
@@ -189,7 +241,11 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         },
       });
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error creating contacts:", error);
+      setMood("error");
+      setErrorMessage(
+        error.message ? `Error: ${error.message}` : "Something went wrong.",
+      );
     }
   };
 
