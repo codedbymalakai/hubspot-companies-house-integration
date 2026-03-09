@@ -92,8 +92,8 @@ exports.main = async (context = {}) => {
       }
 
       const email = lastName
-        ? `${firstName.toLowerCase()}.${lastName.toLowerCase()}.${companyNumber}@example.com`
-        : `${firstName.toLowerCase()}.${companyNumber}@example.com`;
+        ? `${firstName.toLowerCase().replace(" ", "")}.${lastName.toLowerCase()}.${companyNumber}@example.com`
+        : `${firstName.toLowerCase().replace(" ", "")}.${companyNumber}@example.com`;
 
       const payload = {
         filterGroups: [
