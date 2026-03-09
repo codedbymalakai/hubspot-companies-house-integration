@@ -34,6 +34,8 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const [companyData, setCompanyData] = useState(null);
   const [mood, setMood] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [lastSearchedCompanyNumber, setLastSearchedCompanyNumber] =
+    useState("");
 
   // Handles the form submission by getting the entered company number
   // calling the serverless function to fetch company data
@@ -63,7 +65,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         setMood("error");
         setErrorMessage(
           response?.body?.error
-            ? `Error: ${error.message}`
+            ? `Error: ${response.body.error}`
             : "Something went wrong.",
         );
         return;
@@ -71,6 +73,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       setCompanyData(response.body); // store API results
       setMood("success");
       setErrorMessage("");
+      setLastSearchedCompanyNumber(companyNumber);
     } catch (error) {
       console.error("Error fetching company data:", error);
       sendAlert({ message: "Error fetching company data", type: "danger" });
@@ -84,7 +87,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // Creates new contacts in HubSpot by sending the company number and ID to a serverless function
   // then shows a success alert if the officers are added or logs an error if the process fails
   const createContact = async () => {
-    const companyNumber = searchValue.trim();
+    const companyNumber = lastSearchedCompanyNumber.trim();
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
@@ -96,6 +99,13 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       setMood("error");
       setErrorMessage("No valid company ID");
       sendAlert({ message: "Company ID is not valid", type: "danger" });
+      return;
+    }
+    if (mood !== "success") {
+      sendAlert({
+        message: "Please wait for the search to finish",
+        type: "warning",
+      });
       return;
     }
     setMood("loading");
@@ -136,7 +146,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // including type, status, incorporation date, address, SIC code, and officers.
   // while logging any errors that occur in the process
   const addProperties = async () => {
-    const companyNumber = searchValue.trim();
+    const companyNumber = lastSearchedCompanyNumber.trim();
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("Company number not valid");
@@ -218,7 +228,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
 
   const addToHubDBTable = async () => {
     const companyId = context.crm.objectId;
-    const companyNumber = searchValue.trim();
+    const companyNumber = lastSearchedCompanyNumber.trim();
     const status = companyData.status;
     const type = companyData.type;
     const incorporationDate = companyData.incorporationDate;
@@ -280,7 +290,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
               Company Information
             </Text>
-            <Text>Company Number: {searchValue}</Text>
+            <Text>Company Number: {lastSearchedCompanyNumber}</Text>
             <Text>Status: {companyData.status}</Text>
             <Text>Type: {companyData.type}</Text>
             <Text>Officers: {companyData.officerString}</Text>
