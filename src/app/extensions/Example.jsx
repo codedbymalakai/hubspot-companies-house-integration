@@ -103,7 +103,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     }
     if (mood !== "success") {
       sendAlert({
-        message: "Please wait for the search to finish",
+        message: "------ Warning about createContact -------",
         type: "warning",
       });
       return;
