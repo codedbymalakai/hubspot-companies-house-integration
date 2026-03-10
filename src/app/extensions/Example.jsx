@@ -37,12 +37,19 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [lastSearchedCompanyNumber, setLastSearchedCompanyNumber] =
     useState("");
+  const [companyArray, setCompanyArray] = useState(null);
+
+  const handleCompanySelect = (companyNumber) => {
+    setSearchValue(companyNumber);
+    setMood("idle");
+    handleSubmit(companyNumber);
+  };
 
   // Handles the form submission by getting the entered company number
   // calling the serverless function to fetch company data
   // logging the response, and either displaying the results or showing an error alert
-  const handleSubmit = async () => {
-    const companyNumber = searchValue.trim();
+  const handleSubmit = async (passedCompanyNumber) => {
+    const companyNumber = passedCompanyNumber ?? searchValue.trim();
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
@@ -244,6 +251,22 @@ const Extension = ({ runServerless, sendAlert, context }) => {
           companyName,
         },
       });
+      if (!response?.body?.ok) {
+        sendAlert({
+          message: response?.body?.error || "Request Failed",
+          type: "danger",
+        });
+        setMood("errorName");
+        setErrorMessage(
+          response?.body?.error
+            ? `Error: ${response.body.error}`
+            : "Something went wrong.",
+        );
+        return;
+      }
+      setCompanyArray(response.body.data); // store API results
+      setMood("successName");
+      setErrorMessage("");
     } catch (error) {}
   };
 
@@ -254,12 +277,24 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   return (
     <Accordion title="Companies House Data Retrieval">
       <Tile>
+        <Form onSubmit={handleNameSubmit}>
+          <Flex direction="row" gap="md" align="end">
+            <Input
+              name="companyName"
+              label="Enter the Company Name"
+              placeholder="e.g. Apple Ltd"
+              value={searchNameValue}
+              onChange={(value) => setSearchNameValue(value)}
+            />
+            <Button type="submit">Search</Button>
+          </Flex>
+        </Form>
         <Flex direction="row" gap="xl">
           <Form onSubmit={handleSubmit}>
             <Flex direction="row" gap="md" align="end">
               <Input
                 name="companyNumber"
-                label="Enter the Companies House Number"
+                label="Enter Companies House Number"
                 placeholder="e.g. 14617299"
                 value={searchValue}
                 onChange={(value) => setSearchValue(value)}
@@ -269,23 +304,38 @@ const Extension = ({ runServerless, sendAlert, context }) => {
               </Button>
             </Flex>
           </Form>
-
-          <Form onSubmit={handleNameSubmit}>
-            <Flex direction="row" gap="md" align="end">
-              <Input
-                name="companyName"
-                label="Search Companies House by Company by Name"
-                placeholder="e.g. Apple Ltd"
-                value={searchNameValue}
-                onChange={(value) => setSearchNameValue(value)}
-              />
-              <Button type="submit">Search</Button>
-            </Flex>
-          </Form>
         </Flex>
       </Tile>
 
       <Divider size="medium" />
+
+      {mood === "successName" && (
+        <Tile>
+          <Box padding="md" border="default">
+            <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
+              Search Results:
+            </Text>
+
+            <Box marginTop="sm">
+              {companyArray.map((company, index) => (
+                <Tile compact={true} key={index}>
+                  <Box key={index} marginBottom="sm">
+                    <Text format={{ fontWeight: "bold" }}>{company.title}</Text>
+                    <Text>
+                      Company number: {company.companyNumber} • {company.status}
+                    </Text>
+                    <Button
+                      onClick={() => handleCompanySelect(company.companyNumber)}
+                    >
+                      View details
+                    </Button>
+                  </Box>
+                </Tile>
+              ))}
+            </Box>
+          </Box>
+        </Tile>
+      )}
 
       {mood === "success" && (
         <Tile>

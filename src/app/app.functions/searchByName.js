@@ -2,7 +2,7 @@ const axios = require("axios");
 
 function toTitleCase(str) {
   if (typeof str !== "string") {
-    return;
+    return "";
   }
   const newStr = str.slice(0, 1).toUpperCase() + str.toLowerCase().slice(1);
   return newStr;
@@ -27,19 +27,35 @@ exports.main = async (context = {}) => {
   }
 
   try {
-    const searchResponse = await axios.get(`${URL}?q=${companyName}`, {
-      auth: { username: COMPANIES_HOUSE_API_KEY, password: "" },
-    });
+    const searchResponse = await axios.get(
+      `${URL}?q=${encodeURIComponent(companyName)}`,
+      {
+        auth: { username: COMPANIES_HOUSE_API_KEY, password: "" },
+      },
+    );
 
-    const companyArray = searchResponse.data.items.map((element) => {
+    const companyArray = (searchResponse?.data?.items || []).map((element) => {
       return {
         title: element.title || "Company has no title",
         companyNumber: element.company_number,
         status: toTitleCase(element.company_status) || "Company has no status",
-        locality: element.address.locality || "Company has no locality",
+        locality: element.address?.locality || "Company has no locality",
       };
     });
-    console.log("\n");
-    console.log(companyArray);
-  } catch (error) {}
+    return {
+      statusCode: searchResponse.status || 200,
+      body: { ok: true, data: companyArray },
+    };
+  } catch (error) {
+    return {
+      statusCode: error.response?.status || 500,
+      body: {
+        ok: false,
+        error:
+          error.message ||
+          error.response?.data?.message ||
+          "Could not search for company",
+      },
+    };
+  }
 };
