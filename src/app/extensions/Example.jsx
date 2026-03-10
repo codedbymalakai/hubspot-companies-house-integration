@@ -31,6 +31,7 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // and sets up state variables for the search input and retrieved company data
 const Extension = ({ runServerless, sendAlert, context }) => {
   const [searchValue, setSearchValue] = useState("");
+  const [searchNameValue, setSearchNameValue] = useState("");
   const [companyData, setCompanyData] = useState(null);
   const [mood, setMood] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -226,6 +227,26 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     }
   };
 
+  const handleNameSubmit = async () => {
+    const companyName = searchNameValue.trim();
+    if (!companyName) {
+      setMood("error");
+      setErrorMessage("No valid company number");
+      sendAlert({ message: "Company number is not valid", type: "danger" });
+      return;
+    }
+    console.log(companyName);
+
+    try {
+      const { response } = await runServerless({
+        name: "searchByName",
+        parameters: {
+          companyName,
+        },
+      });
+    } catch (error) {}
+  };
+
   // Returns the JSX layout for the extension UI
   // displaying a search form for a Companies House number inside an accordion
   // showing the retrieved company details once fetched
@@ -233,20 +254,35 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   return (
     <Accordion title="Companies House Data Retrieval">
       <Tile>
-        <Form onSubmit={handleSubmit}>
-          <Flex direction="row" gap="md" align="end">
-            <Input
-              name="search"
-              label="Enter the Companies House Number"
-              placeholder="e.g. 14617299"
-              value={searchValue}
-              onChange={(value) => setSearchValue(value)}
-            />
-            <Button type="submit" disabled={mood === "loading"}>
-              Search
-            </Button>
-          </Flex>
-        </Form>
+        <Flex direction="row" gap="xl">
+          <Form onSubmit={handleSubmit}>
+            <Flex direction="row" gap="md" align="end">
+              <Input
+                name="companyNumber"
+                label="Enter the Companies House Number"
+                placeholder="e.g. 14617299"
+                value={searchValue}
+                onChange={(value) => setSearchValue(value)}
+              />
+              <Button type="submit" disabled={mood === "loading"}>
+                Search
+              </Button>
+            </Flex>
+          </Form>
+
+          <Form onSubmit={handleNameSubmit}>
+            <Flex direction="row" gap="md" align="end">
+              <Input
+                name="companyName"
+                label="Search Companies House by Company by Name"
+                placeholder="e.g. Apple Ltd"
+                value={searchNameValue}
+                onChange={(value) => setSearchNameValue(value)}
+              />
+              <Button type="submit">Search</Button>
+            </Flex>
+          </Form>
+        </Flex>
       </Tile>
 
       <Divider size="medium" />
