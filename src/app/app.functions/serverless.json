@@ -3,16 +3,13 @@
     "getData": {
       "file": "example-function.js",
       "secrets": ["COMPANIES_HOUSE_API_KEY"]
-      },
-      "addOfficersToCRM": {
-        "file": "addOfficersToCRM.js",
-        "secrets": ["COMPANIES_HOUSE_API_KEY"]
-      },
-      "addToProperties": {
-        "file": "addToProperties.js"
-      },
-      "addToHubDB": {
-        "file": "addToHubDB.js"
-      }
+    },
+    "addOfficersToCRM": {
+      "file": "addOfficersToCRM.js",
+      "secrets": ["COMPANIES_HOUSE_API_KEY"]
+    },
+    "addToProperties": {
+      "file": "addToProperties.js"
     }
   }
+}

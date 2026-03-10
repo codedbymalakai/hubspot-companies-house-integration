@@ -226,39 +226,6 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     }
   };
 
-  const addToHubDBTable = async () => {
-    const companyId = context.crm.objectId;
-    const companyNumber = lastSearchedCompanyNumber.trim();
-    const status = companyData.status;
-    const type = companyData.type;
-    const incorporationDate = companyData.incorporationDate;
-    const officeAddress = companyData.office_address;
-    const sicCode = companyData.sicCode;
-    const officers = companyData.officerString;
-
-    try {
-      const { response } = await runServerless({
-        name: "addToHubDB",
-        parameters: {
-          companyNumber,
-          companyId,
-          status,
-          type,
-          incorporationDate,
-          officeAddress,
-          sicCode,
-          officers,
-        },
-      });
-    } catch (error) {
-      console.error("Error creating contacts:", error);
-      setMood("error");
-      setErrorMessage(
-        error.message ? `Error: ${error.message}` : "Something went wrong.",
-      );
-    }
-  };
-
   // Returns the JSX layout for the extension UI
   // displaying a search form for a Companies House number inside an accordion
   // showing the retrieved company details once fetched
@@ -302,9 +269,6 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             </Button>
             <Button onClick={addProperties} disabled={mood === "loading"}>
               Add Information to Properties
-            </Button>
-            <Button onClick={addToHubDBTable} disabled={mood === "loading"}>
-              Add to HubDB Table
             </Button>
           </Box>
         </Tile>
