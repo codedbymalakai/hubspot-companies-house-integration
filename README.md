@@ -1,17 +1,30 @@
-# HubSpot Getting Started Project Template
+# Companies House → HubSpot CRM Automation
 
-This is the Getting Started project for HubSpot developer projects. It contains a private app, a CRM card written in React, and a serverless function that the CRM card is able to interact with. This code is intended to help developers get up and running with developer projects quickly and easily.
+A HubSpot CRM card that retrieves company data from the UK Companies House API and automatically populates HubSpot records. The tool also creates HubSpot contacts for company officers and associates them with the company.
 
-## Requirements
+This project demonstrates API integration, serverless functions, and CRM automation within HubSpot.
 
-There are a few things that must be set up before you can make use of this getting started project.
+---
 
-- You must have an active HubSpot account.
-- You must have the [HubSpot CLI](https://www.npmjs.com/package/@hubspot/cli) installed and set up.
-- You must have access to developer projects (developer projects are currently [in public beta under "CRM Development Tools"](https://app.hubspot.com/l/whats-new/betas)).
+## Features
 
-## Usage
+- Search Companies House by company number
+- Display company information inside a HubSpot CRM card
+- Automatically create HubSpot contacts for company officers
+- Associate officers with the company record
+- Populate HubSpot company properties with Companies House data
 
-The HubSpot CLI enables you to run this project locally so that you may test and iterate quickly. Getting started is simple, just run this HubSpot CLI command in your project directory and follow the prompts:
+---
 
-`hs project dev`
+## Tech Stack
+
+- JavaScript
+- React (HubSpot UI Extensions)
+- Node.js serverless functions
+- Axios
+- HubSpot CRM API
+- Companies House API
+
+---
+
+## Architecture
