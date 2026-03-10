@@ -1,48 +1,72 @@
+const axios = require("axios");
 exports.main = async (context = {}) => {
-    // Base HubSpot API endpoint for updating company records
-    const baseApiEndpoint = `https://api.hubapi.com/crm/v3/objects/companies/`;
-    // Securely retrieve the HubSpot access token from environment variables (HubSpot injects this automatically)
-    const ACCESS_TOKEN = process.env["ACCESS_TOKEN"];
-    // Extract company-related parameters passed from the front end or use default placeholder values for testing
-    const companyNumber = context.parameters?.companyNumber || "12345678";
-    const companyId = context.parameters?.companyId || "";
-    const companyStatus = context.parameters?.status || "InActive";
-    const companyIncorporationDate = context.parameters?.incorporationDate || "2025-10-10";
-    const companySicCode = context.parameters?.sicCode || "12345";
-    const companyOfficeAddress = context.parameters?.officeAddress || "123 Main Lane";
-    const companyOfficers = context.parameters?.officers;
-    console.log("companyOfficers = ", companyOfficers);
-    console.log("context.parameters?.officers = ", context.parameters?.officers);
-    const companyType = context.parameters?.type;
+  const baseApiEndpoint = `https://api.hubapi.com/crm/v3/objects/companies/`;
 
-    // Define the PATCH request options for updating HubSpot company properties  
-    // Includes authentication headers and the request body with updated company details
-    const Options = {
-        method: "PATCH",
-        headers: {Authorization: `Bearer ${ACCESS_TOKEN}`, 
-            'Content-Type': 'application/json',
-        },
-        body: `{"properties":{"companies_house_number":"${companyNumber}","ch_incorporation_date":"${companyIncorporationDate}","ch_officer_s":"${companyOfficers}","ch_sic_code":"${companySicCode}","ch_company_type":"${companyType}","ch_company_status":"${companyStatus}","ch_registered_office_address":"${companyOfficeAddress}"}}`
-    }
-     // Attempt to send the update request to HubSpot
-    try {
-    const updateResponse = await fetch(`${baseApiEndpoint}${companyId}`, Options);
-    const data = await updateResponse.json();
-
-    // Log success or failure messages depending on the API response
-    if (!updateResponse.ok) {
-        console.error("Failed to update properties:", data);
-    } else {
-        console.log("Updated properties successfully:", data);
-    }
-    // Catch and log any unexpected errors during the API request
-    } catch (error) {
-        console.error("Error updating properties:", error);
-    }
-     // Return a 200 status code to confirm the function executed successfully
+  const ACCESS_TOKEN = process.env["ACCESS_TOKEN"];
+  if (!ACCESS_TOKEN) {
     return {
-        statusCode: 200,
-        body: {
-        }
+      statusCode: 400,
+      body: { ok: false, error: "Access Token is required" },
+    };
+  }
+
+  const companyNumber = context.parameters?.companyNumber;
+  const companyId = context.parameters?.companyId;
+
+  if (!companyNumber || !companyId) {
+    return {
+      statusCode: 400,
+      body: { ok: false, error: "Company number and company ID is required" },
+    };
+  }
+
+  const companyStatus = context.parameters?.status || "No Status available";
+  const companyIncorporationDate =
+    context.parameters?.incorporationDate || "No Date available";
+  const companySicCode = context.parameters?.sicCode || "No SIC Code available";
+  const companyOfficeAddress =
+    context.parameters?.officeAddress || "No Address available";
+  const companyOfficers =
+    context.parameters?.officers || "No Officers available";
+  const companyType = context.parameters?.type || "No Type available";
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+  };
+  const payload = {
+    properties: {
+      companies_house_number: companyNumber,
+      ch_incorporation_date: companyIncorporationDate,
+      ch_officer_s: companyOfficers,
+      ch_sic_code: companySicCode,
+      ch_company_type: companyType,
+      ch_company_status: companyStatus,
+      ch_registered_office_address: companyOfficeAddress,
+    },
+  };
+  // Attempt to send the update request to HubSpot
+  try {
+    const updateResponse = await axios.patch(
+      `${baseApiEndpoint}${companyId}`,
+      payload,
+      config,
+    );
+    if (updateResponse.status !== 200) {
+      console.error(`Failed to add properties to the CRM`);
+    } else {
+      console.log(`Added properties to the CRM`);
     }
-}
+    return {
+      statusCode: updateResponse.status || 200,
+      body: { ok: true, message: "Properties added to the CRM!" },
+    };
+  } catch (error) {
+    return {
+      statusCode: error?.response?.status || 500,
+      body: { ok: false, error: error.message || "Unknown Error" },
+    };
+  }
+};
