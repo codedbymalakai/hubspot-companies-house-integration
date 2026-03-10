@@ -30,11 +30,11 @@ This project demonstrates API integration, serverless functions, and CRM automat
 ## Architecture
 
 HubSpot CRM Card (React)
-↓
+->
 Serverless Functions
-↓
+->
 Companies House API
-↓
+->
 HubSpot CRM API
 
 ### Flow
