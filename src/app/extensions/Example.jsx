@@ -361,6 +361,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
               Company Information
             </Text>
+            <Text>Company Name: {companyData.companyName}</Text>
             <Text>Company Number: {lastSearchedCompanyNumber}</Text>
             <Text>Status: {companyData.status}</Text>
             <Text>Type: {companyData.type}</Text>

@@ -46,6 +46,7 @@ exports.main = async (context = {}) => {
 
     const statusCode = companyResponse.status;
     const data = companyResponse.data;
+    const companyName = data.company_name || "N/A";
     const status = capitalizeFirst(data.company_status) || "N/A";
     const type = capitalizeFirst(data.type) || "N/A";
     const incorporationDate = data.date_of_creation || "N/A";
@@ -81,6 +82,7 @@ exports.main = async (context = {}) => {
       statusCode,
       body: {
         ok: true,
+        companyName,
         status,
         type,
         incorporationDate,
