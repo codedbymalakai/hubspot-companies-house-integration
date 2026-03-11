@@ -49,7 +49,6 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // calling the serverless function to fetch company data
   // logging the response, and either displaying the results or showing an error alert
   const handleSubmit = async (passedCompanyNumber) => {
-    console.log(sendAlert);
     const companyNumber =
       passedCompanyNumber?.targetValue?.companyNumber ??
       searchValue.trim() ??
@@ -58,7 +57,10 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
-      sendAlert({ message: "Company number is not valid", type: "danger" });
+      sendAlert({
+        message: "Company number is not valid",
+        type: "danger",
+      });
       return;
     }
     setMood("loading");
@@ -240,10 +242,9 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     if (!companyName) {
       setMood("error");
       setErrorMessage("No valid company number");
-      sendAlert({ message: "Company number is not valid", type: "danger" });
+      sendAlert({ message: "Company name is not valid", type: "danger" });
       return;
     }
-    console.log(companyName);
 
     try {
       const { response } = await runServerless({
