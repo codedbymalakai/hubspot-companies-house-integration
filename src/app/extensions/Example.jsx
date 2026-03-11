@@ -37,7 +37,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [lastSearchedCompanyNumber, setLastSearchedCompanyNumber] =
     useState("");
-  const [companyArray, setCompanyArray] = useState(null);
+  const [companyArray, setCompanyArray] = useState([]);
 
   const handleCompanySelect = (companyNumber) => {
     setSearchValue(companyNumber);
@@ -49,7 +49,8 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // calling the serverless function to fetch company data
   // logging the response, and either displaying the results or showing an error alert
   const handleSubmit = async (passedCompanyNumber) => {
-    const companyNumber = passedCompanyNumber ?? searchValue.trim();
+    const companyNumber =
+      passedCompanyNumber?.targetValue?.companyNumber ?? searchValue.trim();
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
@@ -317,21 +318,30 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             </Text>
 
             <Box marginTop="sm">
-              {companyArray.map((company, index) => (
-                <Tile compact={true} key={index}>
-                  <Box key={index} marginBottom="sm">
-                    <Text format={{ fontWeight: "bold" }}>{company.title}</Text>
-                    <Text>
-                      Company number: {company.companyNumber} • {company.status}
-                    </Text>
-                    <Button
-                      onClick={() => handleCompanySelect(company.companyNumber)}
-                    >
-                      View details
-                    </Button>
-                  </Box>
-                </Tile>
-              ))}
+              {companyArray.length > 0 ? (
+                companyArray.map((company) => (
+                  <Tile compact={true} key={company.companyNumber}>
+                    <Box marginBottom="sm">
+                      <Text format={{ fontWeight: "bold" }}>
+                        {company.title}
+                      </Text>
+                      <Text>
+                        Company number: {company.companyNumber} •{" "}
+                        {company.status}
+                      </Text>
+                      <Button
+                        onClick={() =>
+                          handleCompanySelect(company.companyNumber)
+                        }
+                      >
+                        View details
+                      </Button>
+                    </Box>
+                  </Tile>
+                ))
+              ) : (
+                <Text>No Companies Found</Text>
+              )}
             </Box>
           </Box>
         </Tile>
