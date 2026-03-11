@@ -50,7 +50,9 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // logging the response, and either displaying the results or showing an error alert
   const handleSubmit = async (passedCompanyNumber) => {
     const companyNumber =
-      passedCompanyNumber?.targetValue?.companyNumber ?? searchValue.trim();
+      passedCompanyNumber?.targetValue?.companyNumber ??
+      searchValue.trim() ??
+      passedCompanyNumber;
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
@@ -268,7 +270,13 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       setCompanyArray(response.body.data); // store API results
       setMood("successName");
       setErrorMessage("");
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error adding properties to the CRM:", error);
+      setMood("error");
+      setErrorMessage(
+        error.message ? `Error: ${error.message}` : "Something went wrong.",
+      );
+    }
   };
 
   // Returns the JSX layout for the extension UI
