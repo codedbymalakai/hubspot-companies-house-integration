@@ -13,6 +13,7 @@ import {
   Form,
   Box,
   Tile,
+  LoadingSpinner,
 } from "@hubspot/ui-extensions";
 
 // Define the extension to be run within the Hubspot CRM... HubSpot gives us an object and we destructure its keys into the function
@@ -316,6 +317,19 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       </Tile>
 
       <Divider size="medium" />
+
+      {mood === "loading" && (
+        <Tile>
+          <Box padding="md" border="default" textAlign="center">
+            <LoadingSpinner
+              label="Loading company data..."
+              layout="centered"
+              size="md"
+              showLabel={true}
+            />
+          </Box>
+        </Tile>
+      )}
 
       {mood === "successName" && (
         <Tile>
