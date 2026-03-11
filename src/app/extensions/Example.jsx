@@ -49,10 +49,12 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // calling the serverless function to fetch company data
   // logging the response, and either displaying the results or showing an error alert
   const handleSubmit = async (passedCompanyNumber) => {
+    console.log(sendAlert);
     const companyNumber =
       passedCompanyNumber?.targetValue?.companyNumber ??
       searchValue.trim() ??
       passedCompanyNumber;
+    console.log(typeof companyNumber);
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
@@ -69,10 +71,6 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       });
 
       if (!response?.body?.ok) {
-        sendAlert({
-          message: response?.body?.error || "Request Failed",
-          type: "danger",
-        });
         setMood("error");
         setErrorMessage(
           response?.body?.error
@@ -361,20 +359,31 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
               Company Information
             </Text>
-            <Text>Company Name: {companyData.companyName}</Text>
+            <Text>Company Name: {companyData?.companyName}</Text>
             <Text>Company Number: {lastSearchedCompanyNumber}</Text>
-            <Text>Status: {companyData.status}</Text>
-            <Text>Type: {companyData.type}</Text>
-            <Text>Officers: {companyData.officerString}</Text>
-            <Text>Incorporation Date: {companyData.incorporationDate}</Text>
-            <Text>Registered Office Address: {companyData.office_address}</Text>
-            <Text>SIC Code: {companyData.sicCode}</Text>
+            <Text>Status: {companyData?.status}</Text>
+            <Text>Type: {companyData?.type}</Text>
+            <Text>Officers: {companyData?.officerString}</Text>
+            <Text>Incorporation Date: {companyData?.incorporationDate}</Text>
+            <Text>
+              Registered Office Address: {companyData?.office_address}
+            </Text>
+            <Text>SIC Code: {companyData?.sicCode}</Text>
             <Button onClick={createContact} disabled={mood === "loading"}>
               Sync Officers to CRM
             </Button>
             <Button onClick={addProperties} disabled={mood === "loading"}>
               Add Information to Properties
             </Button>
+          </Box>
+        </Tile>
+      )}
+
+      {mood === "error" && (
+        <Tile>
+          <Box padding="md" border="default">
+            <Text>No company found with that company number.</Text>
+            <Text>Please check the number and try again.</Text>
           </Box>
         </Tile>
       )}
