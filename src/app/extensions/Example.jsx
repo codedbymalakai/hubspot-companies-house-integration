@@ -41,6 +41,11 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const [companyArray, setCompanyArray] = useState([]);
 
   const handleCompanySelect = (companyNumber) => {
+    alert("handleCompanySelect: " + companyNumber);
+    sendAlert({
+      message: "Company selected: " + companyNumber,
+      type: "info",
+    });
     setSearchValue(companyNumber);
     setMood("idle");
     handleSubmit(companyNumber);
@@ -54,7 +59,12 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       passedCompanyNumber?.targetValue?.companyNumber ??
       searchValue.trim() ??
       passedCompanyNumber;
-    console.log(typeof companyNumber);
+    alert("handleSubmit companyNumber: " + companyNumber);
+    sendAlert({
+      message: "handleSubmit companyNumber: " + companyNumber,
+      type: "info",
+    });
+    console.log("handleSubmit - companyNumber:", companyNumber, "type:", typeof companyNumber, "passedCompanyNumber:", passedCompanyNumber, "searchValue:", searchValue);
     if (!companyNumber) {
       setMood("error");
       setErrorMessage("No valid company number");
