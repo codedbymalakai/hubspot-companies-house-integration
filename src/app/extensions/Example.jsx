@@ -383,12 +383,14 @@ const Extension = ({ runServerless, sendAlert, context }) => {
               Registered Office Address: {companyData?.office_address}
             </Text>
             <Text>SIC Code: {companyData?.sicCode}</Text>
-            <Button onClick={createContact} disabled={mood === "loading"}>
-              Sync Officers to CRM
-            </Button>
-            <Button onClick={addProperties} disabled={mood === "loading"}>
-              Add Information to Properties
-            </Button>
+            <Flex direction={{ default: "column", tablet: "row" }} gap="sm">
+              <Button onClick={createContact} disabled={mood === "loading"} truncate={true} size="sm">
+                Sync Officers to CRM
+              </Button>
+              <Button onClick={addProperties} disabled={mood === "loading"} truncate={true} size="sm">
+                Add Information to Properties
+              </Button>
+            </Flex>
           </Box>
         </Tile>
       )}
