@@ -12,6 +12,6 @@
       "file": "assets/example-card-preview.png",
       "altText": "Example app card UI extension, demonstrating a card with a title, description, and a button"
     },
-    "objectTypes": [{ "name": "companies" }]
+    "objectTypes": [{ "name": "deals" }]
   }
 }

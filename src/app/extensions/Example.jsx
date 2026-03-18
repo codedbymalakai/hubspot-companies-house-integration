@@ -1,7 +1,7 @@
 // Imports React and the useState hook for managing component state
 // along with various prebuilt HubSpot UI components
 // from the @hubspot/ui-extensions library to build the extension's interface
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Divider,
   Button,
@@ -14,7 +14,7 @@ import {
   Box,
   Tile,
   LoadingSpinner,
-} from "@hubspot/ui-extensions";
+} from '@hubspot/ui-extensions';
 
 // Define the extension to be run within the Hubspot CRM... HubSpot gives us an object and we destructure its keys into the function
 // connecting it to backend functions and in-app actions
@@ -31,20 +31,105 @@ hubspot.extend(({ context, runServerlessFunction, actions }) => (
 // logs the HubSpot context for debugging
 // and sets up state variables for the search input and retrieved company data
 const Extension = ({ runServerless, sendAlert, context }) => {
-  const [searchValue, setSearchValue] = useState("");
-  const [searchNameValue, setSearchNameValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
+  const [searchNameValue, setSearchNameValue] = useState('');
   const [companyData, setCompanyData] = useState(null);
-  const [mood, setMood] = useState("idle");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [mood, setMood] = useState('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [lastSearchedCompanyNumber, setLastSearchedCompanyNumber] =
-    useState("");
+    useState('');
   const [companyArray, setCompanyArray] = useState([]);
 
-  const handleCompanySelect = (companyNumber) => {
-    setSearchValue(companyNumber);
-    setMood("idle");
-    handleSubmit(companyNumber);
-  };
+  // const handleCompanySelect = (companyNumber) => {
+  //   setSearchValue(companyNumber);
+  //   setMood('idle');
+  //   handleSubmit(companyNumber);
+  // };
+
+  const handleCompanySelect = async (companyNumber) => {
+    const dealId = context?.crm?.objectId;
+    try {
+      const { response } = await runServerless({
+        name: 'updateCompanyNumber',
+        parameters: { companyNumber, dealId },
+      });
+      if (!response?.body?.ok) {
+        sendAlert({
+          message: response?.body?.error || 'Error!',
+          type: 'danger',
+        });
+        setMood('error');
+        setErrorMessage(
+          response?.body?.error
+            ? `Error: ${response.body.error}`
+            : 'Error: Something went wrong.',
+        );
+        return;
+      }
+    } catch (error) {
+      console.error('Error selecting company:', error);
+      setMood('error');
+      setErrorMessage(
+        error.message ? `Error: ${error.message}` : 'Something went wrong.',
+      );
+    }
+  }; // ← closing brace was missing
+
+  // const createContact = async () => {
+  //   const companyNumb = lastSearchedCompanyNumber.trim();
+  //   if (!companyNumber) {
+  //     setMood('error');
+  //     setErrorMessage('No valid company number');
+  //     sendAlert({ message: 'Company number is not valid', type: 'danger' });
+  //     return;
+  //   }
+  //   const companyId = context?.crm?.objectId;
+  //   if (!companyId) {
+  //     setMood('error');
+  //     setErrorMessage('No valid company ID');
+  //     sendAlert({ message: 'Company ID is not valid', type: 'danger' });
+  //     return;
+  //   }
+  //   if (mood !== 'success') {
+  //     sendAlert({
+  //       message: '------ Warning about createContact -------',
+  //       type: 'warning',
+  //     });
+  //     return;
+  //   }
+  //   setMood('loading');
+  //   try {
+  //     const { response } = await runServerless({
+  //       name: 'addOfficersToCRM',
+  //       parameters: { companyNumber, companyId },
+  //     });
+  //     if (!response?.body?.ok) {
+  //       sendAlert({
+  //         message: response?.body?.error || 'Error!',
+  //         type: 'danger',
+  //       });
+  //       setMood('error');
+  //       setErrorMessage(
+  //         response?.body?.error
+  //           ? `Error: ${response.body.error}`
+  //           : 'Error: Something went wrong.',
+  //       );
+  //       return;
+  //     }
+  //     setMood('success');
+  //     setErrorMessage('');
+  //     sendAlert({
+  //       message: response?.body?.message || 'Success!',
+  //       type: 'success',
+  //     });
+  //   } catch (error) {
+  //     console.error('Error creating contacts:', error);
+  //     setMood('error');
+  //     setErrorMessage(
+  //       error.message ? `Error: ${error.message}` : 'Something went wrong.',
+  //     );
+  //   }
+  // };
 
   // Handles the form submission by getting the entered company number
   // calling the serverless function to fetch company data
@@ -55,42 +140,42 @@ const Extension = ({ runServerless, sendAlert, context }) => {
       passedCompanyNumber ??
       searchValue.trim();
     if (!companyNumber) {
-      setMood("error");
-      setErrorMessage("No valid company number");
+      setMood('error');
+      setErrorMessage('No valid company number');
       sendAlert({
-        message: "Company number is not valid",
-        type: "danger",
+        message: 'Company number is not valid',
+        type: 'danger',
       });
       return;
     }
-    setMood("loading");
+    setMood('loading');
     setCompanyData(null);
 
     try {
       const { response } = await runServerless({
-        name: "getData",
+        name: 'getData',
         parameters: { companyNumber }, // pass input to serverless
       });
 
       if (!response?.body?.ok) {
-        setMood("error");
+        setMood('error');
         setErrorMessage(
           response?.body?.error
             ? `Error: ${response.body.error}`
-            : "Something went wrong.",
+            : 'Something went wrong.',
         );
         return;
       }
       setCompanyData(response.body); // store API results
-      setMood("success");
-      setErrorMessage("");
+      setMood('success');
+      setErrorMessage('');
       setLastSearchedCompanyNumber(companyNumber);
     } catch (error) {
-      console.error("Error fetching company data:", error);
-      sendAlert({ message: "Error fetching company data", type: "danger" });
-      setMood("error");
+      console.error('Error fetching company data:', error);
+      sendAlert({ message: 'Error fetching company data', type: 'danger' });
+      setMood('error');
       setErrorMessage(
-        error.message ? `Error: ${error.message}` : "Something went wrong.",
+        error.message ? `Error: ${error.message}` : 'Something went wrong.',
       );
     }
   };
@@ -100,55 +185,55 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const createContact = async () => {
     const companyNumber = lastSearchedCompanyNumber.trim();
     if (!companyNumber) {
-      setMood("error");
-      setErrorMessage("No valid company number");
-      sendAlert({ message: "Company number is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('No valid company number');
+      sendAlert({ message: 'Company number is not valid', type: 'danger' });
       return;
     }
     const companyId = context?.crm?.objectId;
     if (!companyId) {
-      setMood("error");
-      setErrorMessage("No valid company ID");
-      sendAlert({ message: "Company ID is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('No valid company ID');
+      sendAlert({ message: 'Company ID is not valid', type: 'danger' });
       return;
     }
-    if (mood !== "success") {
+    if (mood !== 'success') {
       sendAlert({
-        message: "------ Warning about createContact -------",
-        type: "warning",
+        message: '------ Warning about createContact -------',
+        type: 'warning',
       });
       return;
     }
-    setMood("loading");
+    setMood('loading');
     try {
       const { response } = await runServerless({
-        name: "addOfficersToCRM",
+        name: 'addOfficersToCRM',
         parameters: { companyNumber, companyId },
       });
       if (!response?.body?.ok) {
         sendAlert({
-          message: response?.body?.error || "Error!",
-          type: "danger",
+          message: response?.body?.error || 'Error!',
+          type: 'danger',
         });
-        setMood("error");
+        setMood('error');
         setErrorMessage(
           response?.body?.error
             ? `Error: ${response.body.error}`
-            : "Error: Something went wrong.",
+            : 'Error: Something went wrong.',
         );
         return;
       }
-      setMood("success");
-      setErrorMessage("");
+      setMood('success');
+      setErrorMessage('');
       sendAlert({
-        message: response?.body?.message || "Success!",
-        type: "success",
+        message: response?.body?.message || 'Success!',
+        type: 'success',
       });
     } catch (error) {
-      console.error("Error creating contacts:", error);
-      setMood("error");
+      console.error('Error creating contacts:', error);
+      setMood('error');
       setErrorMessage(
-        error.message ? `Error: ${error.message}` : "Something went wrong.",
+        error.message ? `Error: ${error.message}` : 'Something went wrong.',
       );
     }
   };
@@ -159,44 +244,44 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const addProperties = async () => {
     const companyNumber = lastSearchedCompanyNumber.trim();
     if (!companyNumber) {
-      setMood("error");
-      setErrorMessage("Company number not valid");
-      sendAlert({ message: "Company number is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('Company number not valid');
+      sendAlert({ message: 'Company number is not valid', type: 'danger' });
       return;
     }
 
     const companyId = context?.crm?.objectId;
     if (!companyId) {
-      setMood("error");
-      setErrorMessage("Company ID not valid");
-      sendAlert({ message: "Company ID is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('Company ID not valid');
+      sendAlert({ message: 'Company ID is not valid', type: 'danger' });
       return;
     }
-    if (mood !== "success") {
+    if (mood !== 'success') {
       sendAlert({
-        message: "Please wait for the search to finish",
-        type: "warning",
+        message: 'Please wait for the search to finish',
+        type: 'warning',
       });
       return;
     }
     if (!companyData) {
-      setMood("error");
-      setErrorMessage("Company Data not valid");
-      sendAlert({ message: "Company data is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('Company Data not valid');
+      sendAlert({ message: 'Company data is not valid', type: 'danger' });
       return;
     }
-    const status = companyData.status || "";
-    const type = companyData.type || "";
-    const incorporationDate = companyData.incorporationDate || "";
-    const officeAddress = companyData.office_address || "";
-    const sicCode = companyData.sicCode || "";
-    const officers = companyData.officerString || "";
+    const status = companyData.status || '';
+    const type = companyData.type || '';
+    const incorporationDate = companyData.incorporationDate || '';
+    const officeAddress = companyData.office_address || '';
+    const sicCode = companyData.sicCode || '';
+    const officers = companyData.officerString || '';
 
-    setMood("loading");
+    setMood('loading');
 
     try {
       const { response } = await runServerless({
-        name: "addToProperties",
+        name: 'addToProperties',
         parameters: {
           companyNumber,
           companyId,
@@ -211,28 +296,28 @@ const Extension = ({ runServerless, sendAlert, context }) => {
 
       if (!response?.body?.ok) {
         sendAlert({
-          message: response?.body?.error || "Error!",
-          type: "danger",
+          message: response?.body?.error || 'Error!',
+          type: 'danger',
         });
-        setMood("error");
+        setMood('error');
         setErrorMessage(
           response?.body?.error
             ? `Error: ${response.body.error}`
-            : "Error: Something went wrong.",
+            : 'Error: Something went wrong.',
         );
         return;
       }
-      setMood("success");
-      setErrorMessage("");
+      setMood('success');
+      setErrorMessage('');
       sendAlert({
-        message: response?.body?.message || "Success!",
-        type: "success",
+        message: response?.body?.message || 'Success!',
+        type: 'success',
       });
     } catch (error) {
-      console.error("Error adding properties to the CRM:", error);
-      setMood("error");
+      console.error('Error adding properties to the CRM:', error);
+      setMood('error');
       setErrorMessage(
-        error.message ? `Error: ${error.message}` : "Something went wrong.",
+        error.message ? `Error: ${error.message}` : 'Something went wrong.',
       );
     }
   };
@@ -240,40 +325,40 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   const handleNameSubmit = async () => {
     const companyName = searchNameValue.trim();
     if (!companyName) {
-      setMood("error");
-      setErrorMessage("No valid company number");
-      sendAlert({ message: "Company name is not valid", type: "danger" });
+      setMood('error');
+      setErrorMessage('No valid company number');
+      sendAlert({ message: 'Company name is not valid', type: 'danger' });
       return;
     }
 
     try {
       const { response } = await runServerless({
-        name: "searchByName",
+        name: 'searchByName',
         parameters: {
           companyName,
         },
       });
       if (!response?.body?.ok) {
         sendAlert({
-          message: response?.body?.error || "Request Failed",
-          type: "danger",
+          message: response?.body?.error || 'Request Failed',
+          type: 'danger',
         });
-        setMood("errorName");
+        setMood('errorName');
         setErrorMessage(
           response?.body?.error
             ? `Error: ${response.body.error}`
-            : "Something went wrong.",
+            : 'Something went wrong.',
         );
         return;
       }
       setCompanyArray(response.body.data); // store API results
-      setMood("successName");
-      setErrorMessage("");
+      setMood('successName');
+      setErrorMessage('');
     } catch (error) {
-      console.error("Error adding properties to the CRM:", error);
-      setMood("error");
+      console.error('Error adding properties to the CRM:', error);
+      setMood('error');
       setErrorMessage(
-        error.message ? `Error: ${error.message}` : "Something went wrong.",
+        error.message ? `Error: ${error.message}` : 'Something went wrong.',
       );
     }
   };
@@ -283,70 +368,54 @@ const Extension = ({ runServerless, sendAlert, context }) => {
   // showing the retrieved company details once fetched
   // and providing buttons to sync officers to the CRM or add the data to HubSpot properties
   return (
-    <Accordion title="Companies House Data Retrieval">
+    <Accordion title='Companies House Data Retrieval'>
       <Tile>
         <Form onSubmit={handleNameSubmit}>
-          <Flex direction="row" gap="md" align="end">
+          <Flex direction='row' gap='md' align='end'>
             <Input
-              name="companyName"
-              label="Enter the Company Name"
-              placeholder="e.g. Apple Ltd"
+              name='companyName'
+              label='Enter the Company Name'
+              placeholder='e.g. Apple Ltd'
               value={searchNameValue}
               onChange={(value) => setSearchNameValue(value)}
             />
-            <Button type="submit">Search</Button>
+            <Button type='submit'>Search</Button>
           </Flex>
         </Form>
-        <Flex direction="row" gap="xl">
-          <Form onSubmit={handleSubmit}>
-            <Flex direction="row" gap="md" align="end">
-              <Input
-                name="companyNumber"
-                label="Enter Companies House Number"
-                placeholder="e.g. 14617299"
-                value={searchValue}
-                onChange={(value) => setSearchValue(value)}
-              />
-              <Button type="submit" disabled={mood === "loading"}>
-                Search
-              </Button>
-            </Flex>
-          </Form>
-        </Flex>
       </Tile>
 
-      <Divider size="medium" />
+      <Divider size='medium' />
 
-      {mood === "loading" && (
+      {mood === 'loading' && (
         <Tile>
-          <Box padding="md" border="default" textAlign="center">
+          <Box padding='md' border='default' textAlign='center'>
             <LoadingSpinner
-              label="Loading company data..."
-              layout="centered"
-              size="md"
+              label='Loading company data...'
+              layout='centered'
+              size='md'
               showLabel={true}
             />
           </Box>
         </Tile>
       )}
 
-      {mood === "successName" && (
+      {mood === 'successName' && (
         <Tile>
-          <Box padding="md" border="default">
-            <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
+          <Box padding='md' border='default'>
+            <Text format={{ fontWeight: 'bold', lineDecoration: 'underline' }}>
               Search Results:
             </Text>
 
-            <Box marginTop="sm">
+            <Box marginTop='sm'>
               {companyArray.length > 0 ? (
                 companyArray.map((company) => (
                   <Tile compact={true} key={company.companyNumber}>
-                    <Box marginBottom="sm">
-                      <Text format={{ fontWeight: "bold" }}>
+                    <Box marginBottom='sm'>
+                      <Text format={{ fontWeight: 'bold' }}>
                         {company.title}
                       </Text>
                       <Text>
-                        Company number: {company.companyNumber} •{" "}
+                        Company number: {company.companyNumber} •{' '}
                         {company.status}
                       </Text>
                       <Button
@@ -354,7 +423,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
                           handleCompanySelect(company.companyNumber)
                         }
                       >
-                        View details
+                        Select
                       </Button>
                     </Box>
                   </Tile>
@@ -367,7 +436,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         </Tile>
       )}
 
-      {mood === "success" && (
+      {/* {mood === "success" && (
         <Tile>
           <Box padding="md" border="default">
             <Text format={{ fontWeight: "bold", lineDecoration: "underline" }}>
@@ -393,11 +462,11 @@ const Extension = ({ runServerless, sendAlert, context }) => {
             </Flex>
           </Box>
         </Tile>
-      )}
+      )} */}
 
-      {mood === "error" && (
+      {mood === 'error' && (
         <Tile>
-          <Box padding="md" border="default">
+          <Box padding='md' border='default'>
             <Text>No company found with that company number.</Text>
             <Text>Please check the number and try again.</Text>
           </Box>
