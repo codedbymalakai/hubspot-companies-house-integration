@@ -6,10 +6,11 @@
     },
     "addOfficersToCRM": {
       "file": "addOfficersToCRM.js",
-      "secrets": ["COMPANIES_HOUSE_API_KEY"]
+      "secrets": ["COMPANIES_HOUSE_API_KEY", "ACCESS_TOKEN"]
     },
     "addToProperties": {
-      "file": "addToProperties.js"
+      "file": "addToProperties.js",
+      "secrets": ["ACCESS_TOKEN"]
     },
     "searchByName": {
       "file": "searchByName.js",
