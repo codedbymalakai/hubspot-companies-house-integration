@@ -72,7 +72,8 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         return;
       }
       sendAlert({
-        message: 'Successfully updated the company number property',
+        message:
+          'Successfully updated the company registration number (CRN) property',
         type: 'success',
       });
       await handleSubmit(companyNumber);
