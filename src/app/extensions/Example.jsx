@@ -48,6 +48,8 @@ const Extension = ({ runServerless, sendAlert, context }) => {
 
   const handleCompanySelect = async (companyNumber) => {
     const dealId = context?.crm?.objectId;
+    console.log(companyNumber);
+    console.log(dealId);
     try {
       const { response } = await runServerless({
         name: 'updateCompanyNumber',
@@ -326,7 +328,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
     const companyName = searchNameValue.trim();
     if (!companyName) {
       setMood('error');
-      setErrorMessage('No valid company number');
+      setErrorMessage('No valid company name');
       sendAlert({ message: 'Company name is not valid', type: 'danger' });
       return;
     }
@@ -351,6 +353,7 @@ const Extension = ({ runServerless, sendAlert, context }) => {
         );
         return;
       }
+      console.log(response.body.data);
       setCompanyArray(response.body.data); // store API results
       setMood('successName');
       setErrorMessage('');

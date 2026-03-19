@@ -3,6 +3,7 @@ exports.main = async (context = {}) => {
   const baseApiEndpoint = `https://api.hubapi.com/crm/v3/objects/deals/`;
 
   const ACCESS_TOKEN = process.env['ACCESS_TOKEN'];
+  console.log(ACCESS_TOKEN);
   if (!ACCESS_TOKEN) {
     return {
       statusCode: 400,
@@ -32,12 +33,14 @@ exports.main = async (context = {}) => {
     },
   };
   // Attempt to send the update request to HubSpot
+  console.log('BEFORE API CALL');
   try {
     const updateResponse = await axios.patch(
       `${baseApiEndpoint}${dealId}`,
       payload,
       config,
     );
+    console.log(updateResponse);
     if (updateResponse.status !== 200) {
       console.error(`Failed to add properties to the CRM`);
     } else {
@@ -48,6 +51,7 @@ exports.main = async (context = {}) => {
       body: { ok: true, message: 'Properties added to the CRM!' },
     };
   } catch (error) {
+    console.log(error.message);
     return {
       statusCode: error?.response?.status || 500,
       body: { ok: false, error: error.message || 'Unknown Error' },
