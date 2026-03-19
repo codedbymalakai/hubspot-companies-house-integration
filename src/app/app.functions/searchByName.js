@@ -36,7 +36,7 @@ exports.main = async (context = {}) => {
 
     const companyArray = (searchResponse?.data?.items || []).map((element) => {
       return {
-        title: element.title || 'Company has no title',
+        title: element.company_name || 'Company has no title',
         companyNumber: element.company_number,
         status: toTitleCase(element.company_status) || 'Company has no status',
         locality: element.address?.locality || 'Company has no locality',
