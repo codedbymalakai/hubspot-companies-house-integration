@@ -17,7 +17,7 @@
     },
     "updateCompanyNumber": {
       "file": "updateCompanyNumber.js",
-      "secrets": ["COMPANIES_HOUSE_API_KEY"]
+      "secrets": ["ACCESS_TOKEN"]
     }
   }
 }

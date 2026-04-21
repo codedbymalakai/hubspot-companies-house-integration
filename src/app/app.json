@@ -2,14 +2,7 @@
   "name": "Novocy Companies House",
   "description": "This is an example private app that shows a custom card on the Contact record tab built with React-based frontend. This card demonstrates a simple handshake with HubSpot's serverless backend.",
   "uid": "get_started_app",
-  "scopes": [
-    "crm.objects.contacts.read",
-    "crm.objects.contacts.write",
-    "crm.objects.companies.read",
-    "crm.objects.companies.write",
-    "crm.objects.deals.write",
-    "crm.objects.deals.read"
-  ],
+  "scopes": ["crm.objects.deals.write", "crm.objects.deals.read"],
   "public": false,
   "extensions": {
     "crm": {
